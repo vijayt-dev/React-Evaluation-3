@@ -151,7 +151,36 @@ Redux Toolkit is a set of tools that helps simplify Redux development. It includ
 
 ## 8) What are pure components in React?
 
+- ReactJS Pure Component Class compares current state and props with new props and states to decide whether the React component should re-render itself or Not.
+- Pure components have some performance improvements and render optimizations since React implements the shouldComponentUpdate() method for them with a shallow comparison for props and state.
 
+```javascript
+import React, { PureComponent } from "react";
+
+class PureClassComponent extends PureComponent {
+  constructor() {
+    super();
+    this.state = {
+      courseName: "React JS"
+    };
+  }
+
+  changeCourseName = () => {
+    this.setState({ courseName: "React JS" });
+  };
+
+  render() {
+    console.log("PureComponent -- Render method called");
+    return (
+      <div>
+        <p> Course Name is : {this.state.name} </p>
+        <button onClick={this.changeName}>Change CourseName</button>
+      </div>
+    );
+  }
+}
+export default PureClassComponent;
+```
 ## 9) What is children prop?
 
 The children prop is used to pass the data from the parent component to the children component but this data must be enclosed within the parent's opening and closing tag.
