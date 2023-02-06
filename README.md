@@ -137,7 +137,7 @@ Redux Toolkit is a set of tools that helps simplify Redux development. It includ
 
 ## 6) Differentiate between React Redux and React's Context API.
 
-| React Redux | Redux  |
+| React Context API | React Redux  |
 | ------------ | ------------ |
 | Better code organization with separate UI logic and State Management Logic  | UI logic and State Management Logic are in the same component  |
 | Debugging can be hard in highly nested React Component Structure even with Dev Tool	  | Incredibly powerful Redux Dev Tools to ease debugging  |
@@ -218,3 +218,367 @@ export default Button;
 ## 10) Why you can't update props in React?
 
 The props should be immutable and top-down. This means that a parent can send whatever prop values it likes to a child, but the child cannot modify its own props.
+
+## 11) Redux toolkit
+
+###  What is redux Provider?
+
+The Provider component makes the Redux store available to any nested components that need to access the Redux store.
+
+**Example**
+
+```javascript
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
+import { persistor, store } from "./app/store";
+import { PersistGate } from "redux-persist/integration/react";
+
+import App from "./App";
+import "./index.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min";
+
+const container = document.getElementById("root");
+const root = createRoot(container);
+
+root.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <App />
+      </PersistGate>
+    </Provider>
+  </React.StrictMode>
+);
+
+```
+
+### What is createSlice?
+
+A function that accepts an initial state, an object of reducer functions, and a "slice name", and automatically generates action creators and action types that correspond to the reducers and state.
+
+Internally, it uses createAction and createReducer.
+
+#### Parameters
+createSlice accepts a single configuration object parameter, with the following options:
+
+**name**
+A string name for this slice of state.
+
+**initialState**
+The initial values for reducers.
+
+**reducers**
+It's an object where the keys will become action type strings, and the functions are reducers that will be run when that action type is dispatched.
+
+**Example**
+
+```javascript
+import { createSlice } from '@reduxjs/toolkit'
+
+const initialState = { value: 0 }
+
+const counterSlice = createSlice({
+  name: 'counter',
+  initialState,
+  reducers: {
+    increment(state) {
+      state.value++
+    },
+    decrement(state) {
+      state.value--
+    },
+  },
+})
+
+export const { increment, decrement } = counterSlice.actions
+export default counterSlice.reducer
+```
+
+### What is extraReducers?
+
+The extraReducers allows you to respond to an action in your slice reducer but does not create an action creator function.
+
+The most common examples are responding to a createAsyncThunk action and responding to an action from another slice.
+
+The extraReducers property in createSlice can be used as a function or as an object.
+
+#### Parameters
+
+**builder**
+The builder have a case function.
+	builder.addCase
+	builder.addDefaultCase
+
+If you create an action using createAsyncThunk function. You can handle loading, success & failure states.
+
+**Example**
+
+```javascript
+const fetchUserById = createAsyncThunk(
+  'users/fetchByIdStatus',
+  async (userId, thunkAPI) => {
+    const response = await userAPI.fetchById(userId)
+    return response.data
+  }
+)
+
+const {actions,reducer} = createSlice({
+  name:'users',
+  reducers:{
+  },
+  initialState:,
+  extraReducers: (builder) => { builder.addCase(fetchUserById.pending, (state, action) => {
+      state.loading=true;
+      state.whoseDataIsLoading = action.payload;
+    })
+  }
+});
+```
+
+1. fetchUserById.pending (handles loading state of the asyncThunk).
+2. fetchUserById.rejected (handles failed state).
+3. fetchUserById.fulfilled (handle success state).
+
+
+### What is useSelector?
+
+Allows you to extract data from the Redux store state.
+
+#### Parameters
+
+**selector**
+It is a function argument that returns the part of the state you want.
+**equalityFn**
+It is a function used for custom equality.
+
+**Example**
+
+```javascript
+import React from 'react'
+import { useSelector } from 'react-redux'
+
+export const CounterComponent = () => {
+  const counter = useSelector((state) => state.counter)
+  return <div>{counter}</div>
+}
+
+```
+
+### What is useDispatch?
+
+The useDispatch hook gives us access to our store's dispatch method. Dispatch is used to send actions into our redux store and is the only way we can affect the store from within a component.
+
+**Example**
+
+```javascript
+import React from 'react'
+import { useDispatch } from 'react-redux'
+
+export const CounterComponent = ({ value }) => {
+  const dispatch = useDispatch()
+
+  return (
+    <div>
+      <span>{value}</span>
+      <button onClick={() => dispatch({ type: 'increment-counter' })}>
+        Increment counter
+      </button>
+    </div>
+  )
+}
+
+```
+
+### What is configureStore?
+
+configureStore() wraps around the Redux library’s createStore() method and the combineReducers() method, and handles most of the store setup for us automatically.
+
+#### Parameters
+
+configureStore accepts a single configuration object parameter.
+
+**reducer**
+
+A single reducer function that will be used as the root reducer, or an object of slice reducers that will be passed to combineReducers()
+
+**middleware**
+
+An array of Redux middleware to install. If not supplied, defaults to
+ the set of middleware returned by getDefaultMiddleware().
+
+ **devTools**
+
+ Whether to enable Redux DevTools integration. Defaults to true.
+Additional configuration can be done by passing Redux DevTools options.
+
+**preloadedState**
+
+The initial state, same as Redux createStore.
+
+**enhancers**
+
+An enhancer is a function that allows you to add functionality to Redux that it doesn't come with out of the box.
+
+An enhancer is a function that gets a copy of createStore and then a copy of all of the arguments passed to createStore before actually passing them to createStore. This allows you to create libraries and plugins that will augment how the store works.
+
+**Example**
+
+```javascript
+import { configureStore } from '@reduxjs/toolkit'
+
+import rootReducer from './reducers'
+
+const store = configureStore({ reducer: rootReducer })
+```
+
+### What is thunk?
+
+The word "thunk" is a programming term that means "a piece of code that does some delayed work". Rather than execute some logic now, we can write a function body or code that can be used to perform the work later.
+
+Redux Thunk is a middleware that allows you to call the action creators that return a function(thunk) which takes the store’s dispatch method as the argument and which is afterwards used to dispatch the synchronous action after the API or side effects has been finished.
+
+**Example**
+
+```javascript
+function getCartItems() {
+	return async function (dispatch) => {
+	const cartItems =  await fetch("API");
+	if(cartItems) 
+		dispatch({
+			type: CART_ITEMS,
+			payload: cartItems.json()
+		})
+}
+}
+```
+
+## 12) redux-persist
+
+### What is PersistGate?
+
+PersistGate delays the rendering of your app's UI until your persisted state has been retrieved and saved to redux.
+The loading prop can be null or any react instance to show during loading (e.g. a splash screen), for example loading={<Loading />}.
+
+**Example**
+
+```javascript
+import React from "react";
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
+import { persistor, store } from "./app/store";
+import { PersistGate } from "redux-persist/integration/react";
+
+import App from "./App";
+import "./index.css";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min";
+
+const container = document.getElementById("root");
+const root = createRoot(container);
+
+root.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <App />
+      </PersistGate>
+    </Provider>
+  </React.StrictMode>
+);
+
+```
+
+### What is persistStore?
+
+persistStore is the function that persists and rehydrates the state. With this function, our store will be saved to the local storage, and even after a browser refresh, our data will still remain.
+
+#### Parameters
+
+**store**
+store redux store The store to be persisted.
+
+**Example**
+
+```javascript
+import { persistStore } from 'redux-persist';
+import { PersistGate } from 'redux-persist/integration/react';
+import store from "../store".
+let persistor = persistStore(store);
+
+ReactDOM.render(
+    <React.StrictMode>
+        <Provider store={store}>
+            <PersistGate persistor={persistor}>
+                <App />
+            </PersistGate>
+        </Provider>
+    </React.StrictMode>,
+    document.getElementById('root')
+);
+
+```
+
+### What is persistReducer?
+
+persistReducer returns an enhanced reducer that wraps the rootReducer you pass in and will persist that reducer's state according to the config you pass in.
+
+#### Parameters
+
+**config**
+It is a configuration object as its first parameter. You must specify the key and storage properties.
+
+**reducer**
+It accept a reducer.
+
+**Example**
+
+```javascript
+import { configureStore } from "@reduxjs/toolkit";
+import userReducer from "./slices/userSlice";
+import storage from 'redux-persist/lib/storage';
+import { persistReducer, persistStore } from 'redux-persist';
+import thunk from 'redux-thunk';
+
+const persistConfig = {
+  key: 'root',
+  storage,
+}
+
+const persistedReducer = persistReducer(persistConfig, userReducer)
+```
+
+
+## 13) redux-storage
+
+### What is storage?
+
+storage defines the storage engine to use. Redux Persist supports multiple different storage backends depending on the environment. For web use, the localStorage and sessionStorage APIs are both supported as well as basic cookies. Options are also available for React Native, Node.js, Electron and several other platforms.
+
+**Example**
+localStorage
+```javascript
+// src/redux/store.js
+import { configureStore } from "@reduxjs/toolkit";
+import storage from 'redux-persist/lib/storage';
+import { persistReducer, persistStore } from 'redux-persist';
+const persistConfig = {
+  key: 'root',
+  storage,
+}
+```
+
+Session
+```javascript
+// src/redux/store.js
+import { configureStore } from "@reduxjs/toolkit";
+import storageSession from 'reduxjs-toolkit-persist/lib/storage/session'
+import { persistReducer, persistStore } from 'redux-persist';
+const persistConfig = {
+  key: 'root',
+  storageSession,
+}
+```
+
+
