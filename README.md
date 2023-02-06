@@ -189,7 +189,6 @@ The children prop is used to pass the data from the parent component to the chil
 App.js
 ```javascript
 import  Button from "./Button"
-import Card from "./Card"
 
 function App() {
 	return (
@@ -401,7 +400,7 @@ configureStore accepts a single configuration object parameter.
 
 **reducer**
 
-A single reducer function that will be used as the root reducer, or an object of slice reducers that will be passed to combineReducers()
+A single reducer function that will be used as the root reducer, or an object of slice reducers that will be passed to combineReducers().
 
 **middleware**
 
